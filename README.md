@@ -11,6 +11,15 @@
 - The repository must provide instructions on how to configure, execute and test the project
 - Documentation and overall organization will also be taken into consideration
 
+### Sales Module
+- **Create Sale**: Validates customer, calculates discounts (10% for 4+, 20% for 10-20 items), ensures limits (max 20 items).
+- **Update Sale**: Modifies items, recalculates totals, triggers `SaleModifiedEvent`.
+- **Get Sale**: Retrieves full sale details with formatted totals.
+- **List Sales**: Paginated retrieval (`_page`, `_size`, `_order`).
+- **Cancel Sale**: Soft delete logic, updates status to `Cancelled`.
+
+### Auth Module
+
 ## Use Case
 **You are a developer on the DeveloperStore team. Now we need to implement the API prototypes.**
 
@@ -84,3 +93,30 @@ This section includes links to the detailed documentation for the different API 
 This section describes the overall structure and organization of the project files and directories. 
 
 See [Project Structure](/.doc/project-structure.md)
+
+## QA & Coverage
+
+> [!NOTE]
+> **Focus of unit tests was on the Sales Module (Domain logic and Command Handlers). Coverage for Sales Domain is >90%. Legacy Auth modules were excluded from the scope.**
+
+The project enforces high code quality standards through comprehensive testing and static analysis.
+
+### Running Tests
+To execute the full test suite:
+```bash
+dotnet test tests/Ambev.DeveloperEvaluation.Unit/Ambev.DeveloperEvaluation.Unit.csproj
+```
+
+### Coverage Report
+To generate a coverage report (Linux/Bash):
+```bash
+./coverage-report.sh
+```
+The report will be available at `TestResults/CoverageReport/index.html`.
+
+### Key Metrics
+*   **Total Tests**: 80 Passing
+*   **Sales Module Coverage**:
+    *   Handlers (Create/Update/Delete/Get): >80%
+    *   Entities & Validation: >95%
+    *   Legacy Modules: Excluded from coverage targets.

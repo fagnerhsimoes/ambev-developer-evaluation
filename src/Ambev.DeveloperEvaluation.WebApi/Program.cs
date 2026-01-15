@@ -12,7 +12,7 @@ using Serilog;
 
 namespace Ambev.DeveloperEvaluation.WebApi;
 
-public class Program
+public partial class Program
 {
     public static void Main(string[] args)
     {
@@ -27,7 +27,13 @@ public class Program
             builder.Services.AddEndpointsApiExplorer();
 
             builder.AddBasicHealthChecks();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                // Include XML comments
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+            });
 
             builder.Services.AddDbContext<DefaultContext>(options =>
                 options.UseNpgsql(
@@ -53,6 +59,37 @@ public class Program
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             var app = builder.Build();
+            
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<DefaultContext>();
+        
+                    // Log para você saber o que está rolando
+                    Log.Information("🚀 Starting Database Migration...");
+
+                    if (context.Database.GetPendingMigrations().Any())
+                    {
+                        context.Database.Migrate();
+                        Log.Information("✅ Database Migration Completed Successfully!");
+                    }
+                    else
+                    {
+                        Log.Information("✅ Database is already up to date.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log Fatal para destacar no console do Docker
+                    Log.Fatal(ex, "❌ CRITICAL ERROR: Database migration failed.");
+        
+                    // IMPORTANTE: Derruba a aplicação para não subir quebrada.
+                    // O Docker vai tentar reiniciar automaticamente.
+                    throw; 
+                }
+            }
+            
             app.UseMiddleware<ValidationExceptionMiddleware>();
 
             if (app.Environment.IsDevelopment())
@@ -82,3 +119,4 @@ public class Program
         }
     }
 }
+public partial class Program { }
