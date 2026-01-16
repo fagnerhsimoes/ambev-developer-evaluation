@@ -9,4 +9,4 @@
 /// retrieved using <c>typeof(ApplicationLayer).Assembly</c>, which allows 
 /// other layers to programmatically reference the application layer's assembly.
 /// </remarks>
-public class ApplicationLayer { }
+public class ApplicationLayer;

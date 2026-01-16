@@ -181,20 +181,18 @@ public class SalesControllerTests(AmbevWebApplicationFactory factory) : IClassFi
         Assert.True(updateResult.Success);
         
         // 5. Verify Persistence (Direct DB)
-        using (var scope = factory.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
-            var updatedSale = await context.Sales.FindAsync(saleId);
-            Assert.NotNull(updatedSale);
-            Assert.Equal("SALE-UPDATED-001", updatedSale.SaleNumber);
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
+        var updatedSale = await context.Sales.FindAsync(saleId);
+        Assert.NotNull(updatedSale);
+        Assert.Equal("SALE-UPDATED-001", updatedSale.SaleNumber);
             
-            // Discount Logic Validation: 
-            // 10 items = 20% discount.
-            // Base Total = 10 * 15 = 150.
-            // Discount = 150 * 0.20 = 30.
-            // Final Total = 120.
-            Assert.Equal(120m, updatedSale.TotalAmount); 
-        }
+        // Discount Logic Validation: 
+        // 10 items = 20% discount.
+        // Base Total = 10 * 15 = 150.
+        // Discount = 150 * 0.20 = 30.
+        // Final Total = 120.
+        Assert.Equal(120m, updatedSale.TotalAmount);
     }
 
     [Fact(DisplayName = "DeleteSale Endpoint should cancel sale and return 200")]
@@ -211,14 +209,12 @@ public class SalesControllerTests(AmbevWebApplicationFactory factory) : IClassFi
         response.EnsureSuccessStatusCode();
         
         // 4. Verify DB
-        using (var scope = factory.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
-            var sale = await context.Sales.FindAsync(saleId);
-            Assert.NotNull(sale);
-            Assert.True(sale.IsCancelled);
-            Assert.Equal(SaleStatus.Cancelled, sale.Status);
-        }
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
+        var sale = await context.Sales.FindAsync(saleId);
+        Assert.NotNull(sale);
+        Assert.True(sale.IsCancelled);
+        Assert.Equal(SaleStatus.Cancelled, sale.Status);
     }
 
     private async Task<Guid> SeedUserAsync(string username)

@@ -14,7 +14,7 @@ namespace Ambev.DeveloperEvaluation.WebApi;
 
 public partial class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         try
         {
@@ -63,34 +63,37 @@ public partial class Program
             // Only run migrations in non-Test environments
             if (!app.Environment.IsEnvironment("Test"))
             {
-                using (var scope = app.Services.CreateScope())
+                using var scope = app.Services.CreateScope();
+                try
                 {
-                    try
-                    {
-                        var context = scope.ServiceProvider.GetRequiredService<DefaultContext>();
+                    var context = scope.ServiceProvider.GetRequiredService<DefaultContext>();
             
-                        // Log para você saber o que está rolando
-                        Log.Information("🚀 Starting Database Migration...");
+                    // Log para você saber o que está rolando
+                    Log.Information("🚀 Starting Database Migration...");
 
-                        if (context.Database.GetPendingMigrations().Any())
-                        {
-                            context.Database.Migrate();
-                            Log.Information("✅ Database Migration Completed Successfully!");
-                        }
-                        else
-                        {
-                            Log.Information("✅ Database is already up to date.");
-                        }
-                    }
-                    catch (Exception ex)
+                    if ((await context.Database.GetPendingMigrationsAsync()).Any())
                     {
-                        // Log Fatal para destacar no console do Docker
-                        Log.Fatal(ex, "❌ CRITICAL ERROR: Database migration failed.");
-            
-                        // IMPORTANTE: Derruba a aplicação para não subir quebrada.
-                        // O Docker vai tentar reiniciar automaticamente.
-                        throw; 
+                        await context.Database.MigrateAsync();
+                        Log.Information("✅ Database Migration Completed Successfully!");
                     }
+                    else
+                    {
+                        Log.Information("✅ Database is already up to date.");
+                    }
+
+                    // Run Seeding
+                    Log.Information("🌱 Starting Database Seeding...");
+                    await Common.DbInitializer.InitializeAsync(app.Services);
+                    Log.Information("✅ Database Seeding Completed Successfully!");
+                }
+                catch (Exception ex)
+                {
+                    // Log Fatal para destacar no console do Docker
+                    Log.Fatal(ex, "❌ CRITICAL ERROR: Database migration failed.");
+            
+                    // IMPORTANTE: Derruba a aplicação para não subir quebrada.
+                    // O Docker vai tentar reiniciar automaticamente.
+                    throw; 
                 }
             }
             
@@ -111,7 +114,7 @@ public partial class Program
 
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
         catch (Exception ex)
         {
@@ -119,8 +122,8 @@ public partial class Program
         }
         finally
         {
-            Log.CloseAndFlush();
+            await Log.CloseAndFlushAsync();
         }
     }
 }
-public partial class Program { }
+public partial class Program;

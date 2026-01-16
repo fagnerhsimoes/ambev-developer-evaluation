@@ -12,6 +12,19 @@
 - The repository must provide instructions on how to configure, execute and test the project
 - Documentation and overall organization will also be taken into consideration
 
+## Authentication & First Access
+
+The API is secure by default (`[Authorize]`). To facilitate testing, the application automatically seeds a default Admin user upon the first startup.
+
+**Default Admin Credentials:**
+- **Email:** `admin@ambev.com.br`
+- **Password:** `Admin123!`
+
+**How to authenticate:**
+1. Open Swagger UI (`/swagger`).
+2. Use the `/api/Auth/login` endpoint with the credentials above to get a JWT Token.
+3. Click the "Authorize" button in Swagger and paste the token as `Bearer <your_token>`.
+
 ### Sales Module
 
 - **Create Sale**: Validates customer, calculates discounts (10% for 4+, 20% for 10-20 items), ensures limits (max 20
