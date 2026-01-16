@@ -96,6 +96,56 @@ public class SalesControllerTests(AmbevWebApplicationFactory factory) : IClassFi
         // Assert.Equal(userId, getResult.Data.CustomerId); 
     }
 
+    [Fact(DisplayName = "CreateSale Endpoint should return BadRequest when data is invalid")]
+    public async Task CreateSale_ShouldReturnBadRequest_WhenDataIsInvalid()
+    {
+        // Arrange
+        var invalidRequest = new CreateSaleRequest(); // Empty request
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/Sales", invalidRequest);
+
+        // Assert
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "GetSale Endpoint should return NotFound when ID does not exist")]
+    public async Task GetSale_ShouldReturnNotFound_WhenIdDoesNotExist()
+    {
+        // Arrange
+        var nonExistentId = Guid.NewGuid();
+
+        // Act
+        var response = await _client.GetAsync($"/api/Sales/{nonExistentId}");
+
+        // Assert
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "UpdateSale Endpoint should return NotFound when ID does not exist")]
+    public async Task UpdateSale_ShouldReturnNotFound_WhenIdDoesNotExist()
+    {
+        // Arrange
+        var nonExistentId = Guid.NewGuid();
+        var updateRequest = new WebApi.Features.Sales.UpdateSale.UpdateSaleRequest
+        {
+            Id = nonExistentId,
+            SaleNumber = "SALE-UPDATED-001",
+            Date = DateTime.UtcNow,
+            CustomerId = Guid.NewGuid(),
+            CustomerName = "user_update",
+            BranchId = Guid.NewGuid(),
+            BranchName = "Branch Updated",
+            Items = [new UpdateSaleCommand.UpdateSaleItemDto { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }]
+        };
+
+        // Act
+        var response = await _client.PutAsJsonAsync($"/api/Sales/{nonExistentId}", updateRequest);
+
+        // Assert
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     [Fact(DisplayName = "UpdateSale Endpoint should update sale and return 200")]
     public async Task UpdateSale_ShouldReturnSuccess_WhenDataIsValid()
     {

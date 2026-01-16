@@ -13,10 +13,10 @@ public class SaleTests
         // Arrange
         var sale = new Sale();
         var item1 = new SaleItem { ProductId = Guid.NewGuid(), ProductName = "Item 1", Quantity = 2, UnitPrice = 10 }; // Total = 20 (0% disc)
-        
+
         var item2 = new SaleItem { ProductId = Guid.NewGuid(), ProductName = "Item 2", Quantity = 5, UnitPrice = 10 }; // 50 * 0.9 = 45 (10% disc)
-        
-        var item3 = new SaleItem { ProductId = Guid.NewGuid(), ProductName = "Item 3", Quantity = 1, UnitPrice = 100 }; 
+
+        var item3 = new SaleItem { ProductId = Guid.NewGuid(), ProductName = "Item 3", Quantity = 1, UnitPrice = 100 };
         item3.Cancel(); // Should be ignored
 
         sale.AddItem(item1);
@@ -29,7 +29,7 @@ public class SaleTests
         // Assert
         sale.TotalAmount.Should().Be(65);
     }
-    
+
     [Fact]
     public void CalculateTotalAmount_WhenSameProductExceeds20_ShouldThrowException()
     {
@@ -37,9 +37,9 @@ public class SaleTests
         var prodId = Guid.NewGuid();
         // 15 + 10 = 25 (> 20)
         sale.AddItem(new SaleItem { ProductId = prodId, ProductName = "Beer", Quantity = 15, UnitPrice = 10 });
-        
+
         // The second add will trigger CalculateTotalAmount which checks the rule
-        Assert.Throws<Ambev.DeveloperEvaluation.Domain.Exceptions.DomainException>(() => 
+        Assert.Throws<Ambev.DeveloperEvaluation.Domain.Exceptions.DomainException>(() =>
             sale.AddItem(new SaleItem { ProductId = prodId, ProductName = "Beer", Quantity = 10, UnitPrice = 10 })
         );
     }

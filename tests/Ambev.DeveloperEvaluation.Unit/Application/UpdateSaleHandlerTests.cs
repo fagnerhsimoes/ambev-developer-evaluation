@@ -40,7 +40,7 @@ public class UpdateSaleHandlerTests
             IsCancelled = true,
             Items = [new UpdateSaleCommand.UpdateSaleItemDto { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }]
         };
-        
+
         var existingSale = new Sale
         {
             Id = command.Id,
@@ -51,11 +51,11 @@ public class UpdateSaleHandlerTests
 
         _saleRepository.GetByIdAsync(command.Id, Arg.Any<CancellationToken>())
             .Returns(existingSale);
-        
+
         // Setup Mapper to actually simulate mapping (or manually map in test if mock is hard)
         // Since we mock Mapper, we need to instruct it what to do, OR stick to real behavior.
         // Better to simulate behavior:
-        _mapper.When(x => x.Map(command, existingSale)).Do(x => 
+        _mapper.When(x => x.Map(command, existingSale)).Do(x =>
         {
             existingSale.SaleNumber = command.SaleNumber;
             // logic for IsCancelled is handled in Handler via separate property check? 
@@ -74,7 +74,7 @@ public class UpdateSaleHandlerTests
         existingSale.SaleNumber.Should().Be("SALE-NEW-001");
         existingSale.IsCancelled.Should().BeTrue();
         existingSale.Status.Should().Be(SaleStatus.Cancelled);
-        
+
         // NOTE: Since the Handler instantiates 'new SaleModifiedEvent(updatedSale)' but doesn't PUBLISH it via Mediator 
         // (the code commented out says "In a real scenario..."), current implementation only creates it.
         // We can't verify PUBLISH if it's not published. 

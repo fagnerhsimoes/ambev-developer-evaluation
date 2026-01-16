@@ -29,12 +29,12 @@ public class GetSaleHandlerTests
         var id = Guid.NewGuid();
         var sale = SaleTestData.GenerateValidSale();
         sale.Id = id;
-        
+
         var command = new GetSaleCommand(id);
-        var resultDto = new GetSaleResult 
-        { 
-            Id = id, 
-            SaleNumber = sale.SaleNumber 
+        var resultDto = new GetSaleResult
+        {
+            Id = id,
+            SaleNumber = sale.SaleNumber
         };
 
         _saleRepository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(sale);

@@ -39,7 +39,7 @@ public class GetSalesHandlerTests
             SaleTestData.GenerateValidSale(),
             SaleTestData.GenerateValidSale()
         };
-        
+
         var totalCount = 2;
 
         _saleRepository.GetAllAsync(command.Page, command.Size, command.Order, Arg.Any<CancellationToken>())
@@ -57,7 +57,7 @@ public class GetSalesHandlerTests
         result.TotalCount.Should().Be(2);
         result.CurrentPage.Should().Be(1);
         result.PageSize.Should().Be(10);
-        
+
         await _saleRepository.Received(1).GetAllAsync(command.Page, command.Size, command.Order, Arg.Any<CancellationToken>());
     }
 }

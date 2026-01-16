@@ -84,25 +84,25 @@ public class SalesController : BaseController
     /// <summary>
     /// Retrieves a paginated list of sales
     /// </summary>
-    /// <param name="_page">Page number</param>
-    /// <param name="_size">Page size</param>
-    /// <param name="_order">Order criteria</param>
+    /// <param name="page">Page number</param>
+    /// <param name="size">Page size</param>
+    /// <param name="order">Order criteria</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Paginated list of sales</returns>
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResponse<GetSaleResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetSales(
-        [FromQuery] int _page = 1,
-        [FromQuery] int _size = 10,
-        [FromQuery] string? _order = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int size = 10,
+        [FromQuery] string? order = null,
         CancellationToken cancellationToken = default)
     {
         var command = new GetSalesCommand
         {
-            Page = _page,
-            Size = _size,
-            Order = _order
+            Page = page,
+            Size = size,
+            Order = order
         };
 
         var response = await _mediator.Send(command, cancellationToken);

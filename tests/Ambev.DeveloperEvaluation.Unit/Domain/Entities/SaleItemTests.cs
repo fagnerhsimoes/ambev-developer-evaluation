@@ -31,7 +31,7 @@ public class SaleItemTests
         Assert.Equal(20m, item.Discount);
         Assert.Equal(1200m, item.TotalAmount); // 15 * 100 * 0.8 = 1200
     }
-    
+
     [Fact(DisplayName = "Item quantity 2 but Group quantity 5 should have 10% discount")]
     public void Given_ItemQuantity2_And_GroupQuantity5_When_Calculated_Then_DiscountShouldBe10Percent()
     {
@@ -44,11 +44,11 @@ public class SaleItemTests
     [Fact(DisplayName = "Quantity 21 should be invalid when validated")]
     public void Given_QuantityIs21_When_Validated_Then_ShouldBeInvalid()
     {
-        var item = new SaleItem { 
-            ProductId = Guid.NewGuid(), 
-            ProductName = "Product", 
-            Quantity = 21, 
-            UnitPrice = 100 
+        var item = new SaleItem {
+            ProductId = Guid.NewGuid(),
+            ProductName = "Product",
+            Quantity = 21,
+            UnitPrice = 100
         };
         var result = item.Validate();
         Assert.False(result.IsValid);
@@ -57,11 +57,11 @@ public class SaleItemTests
     [Fact(DisplayName = "Quantity zero should be invalid when validated")]
     public void Given_QuantityIsZero_When_Validated_Then_ShouldBeInvalid()
     {
-        var item = new SaleItem { 
-            ProductId = Guid.NewGuid(), 
-            ProductName = "Product", 
-            Quantity = 0, 
-            UnitPrice = 100 
+        var item = new SaleItem {
+            ProductId = Guid.NewGuid(),
+            ProductName = "Product",
+            Quantity = 0,
+            UnitPrice = 100
         };
         var result = item.Validate();
         Assert.False(result.IsValid);

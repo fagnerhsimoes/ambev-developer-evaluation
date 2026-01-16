@@ -16,6 +16,7 @@ public class CreateSaleHandlerTests
     private readonly ISaleRepository _saleRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<CreateSaleHandler> _logger;
     private readonly CreateSaleHandler _handler;
 
     public CreateSaleHandlerTests()
@@ -23,8 +24,8 @@ public class CreateSaleHandlerTests
         _saleRepository = Substitute.For<ISaleRepository>();
         _userRepository = Substitute.For<IUserRepository>();
         _mapper = Substitute.For<IMapper>();
-        var logger = Substitute.For<ILogger<CreateSaleHandler>>();
-        _handler = new CreateSaleHandler(_saleRepository, _userRepository, _mapper, logger);
+        _logger = Substitute.For<ILogger<CreateSaleHandler>>();
+        _handler = new CreateSaleHandler(_saleRepository, _userRepository, _mapper, _logger);
     }
 
     [Fact(DisplayName = "Given valid command When handled Then creates sale successfully")]
@@ -63,6 +64,14 @@ public class CreateSaleHandlerTests
         await _saleRepository.Received(1).CreateAsync(sale, Arg.Any<CancellationToken>());
         sale.CustomerName.Should().Be("Customer Name");
         sale.Status.Should().Be(SaleStatus.Pending);
+
+        // Verify Logging
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(v => v.ToString()!.Contains("SaleCreatedEvent")),
+            null,
+            Arg.Any<Func<object, Exception?, string>>());
     }
 
     [Fact(DisplayName = "Given invalid customer When handled Then throws ValidationException")]
