@@ -1,0 +1,9 @@
+<Project>
+    <PropertyGroup Label="Core properties">
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+</Project>

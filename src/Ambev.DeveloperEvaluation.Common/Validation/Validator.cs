@@ -6,7 +6,7 @@ public static class Validator
 {
     public static async Task<IEnumerable<ValidationErrorDetail>> ValidateAsync<T>(T instance)
     {
-        Type validatorType = typeof(IValidator<>).MakeGenericType(typeof(T));
+        var validatorType = typeof(IValidator<>).MakeGenericType(typeof(T));
 
         if (Activator.CreateInstance(validatorType) is not IValidator validator)
         {
@@ -15,11 +15,6 @@ public static class Validator
 
         var result = await validator.ValidateAsync(new ValidationContext<T>(instance));
 
-        if (!result.IsValid)
-        {
-            return result.Errors.Select(o => (ValidationErrorDetail)o);
-        }
-
-        return [];
+        return !result.IsValid ? result.Errors.Select(o => (ValidationErrorDetail)o) : [];
     }
 }
