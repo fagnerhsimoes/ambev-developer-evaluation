@@ -10,5 +10,5 @@ public class CreateSaleRequest
     public string CustomerName { get; set; } = string.Empty;
     public Guid BranchId { get; set; }
     public string BranchName { get; set; } = string.Empty;
-    public List<CreateSaleCommand.CreateSaleItemDto> Items { get; set; } = new();
+    public List<CreateSaleCommand.CreateSaleItemDto> Items { get; set; } = [];
 }

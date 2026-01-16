@@ -7,12 +7,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation;
 
 public class SaleItemValidatorTests
 {
-    private readonly SaleItemValidator _validator;
-
-    public SaleItemValidatorTests()
-    {
-        _validator = new SaleItemValidator();
-    }
+    private readonly SaleItemValidator _validator = new();
 
     [Fact(DisplayName = "Quantity 0 should fail validation")]
     public void Given_QuantityZero_When_Validated_Then_ShouldHaveError()

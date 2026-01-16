@@ -15,5 +15,5 @@ public class GetSaleResponse
     public decimal TotalAmount { get; set; }
     public bool IsCancelled { get; set; }
     public SaleStatus Status { get; set; }
-    public List<GetSaleItemDto> SaleItems { get; set; } = new();
+    public List<GetSaleItemDto> SaleItems { get; set; } = [];
 }

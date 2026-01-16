@@ -37,10 +37,7 @@ public class CreateSaleHandlerTests
             CustomerName = "Customer Name",
             BranchName = "Branch A",
             BranchId = Guid.NewGuid(),
-            Items = new List<CreateSaleCommand.CreateSaleItemDto>
-            {
-                new() { ProductId = Guid.NewGuid(), ProductName = "Product A", Quantity = 5, UnitPrice = 100 }
-            }
+            Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Product A", Quantity = 5, UnitPrice = 100 }]
         };
 
         var customer = new User { Id = command.CustomerId, Username = "Customer Name" };
@@ -50,7 +47,7 @@ public class CreateSaleHandlerTests
         {
             Id = Guid.NewGuid(),
             CustomerId = command.CustomerId,
-            SaleItems = new List<SaleItem>()
+            SaleItems = []
         };
         _mapper.Map<Sale>(command).Returns(sale);
         _saleRepository.CreateAsync(sale, Arg.Any<CancellationToken>()).Returns(sale);
@@ -78,10 +75,7 @@ public class CreateSaleHandlerTests
             CustomerName = "John Doe",
             BranchName = "Branch A",
             BranchId = Guid.NewGuid(),
-             Items = new List<CreateSaleCommand.CreateSaleItemDto>
-            {
-                new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 100 }
-            }
+             Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 100 }]
         };
 
         _userRepository.GetByIdAsync(command.CustomerId, Arg.Any<CancellationToken>()).Returns((User?)null);

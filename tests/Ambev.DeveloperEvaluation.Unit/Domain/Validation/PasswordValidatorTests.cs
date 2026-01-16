@@ -11,12 +11,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation;
 /// </summary>
 public class PasswordValidatorTests
 {
-    private readonly PasswordValidator _validator;
-
-    public PasswordValidatorTests()
-    {
-        _validator = new PasswordValidator();
-    }
+    private readonly PasswordValidator _validator = new();
 
     /// <summary>
     /// Tests that validation passes for various valid password formats.

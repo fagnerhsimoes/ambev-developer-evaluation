@@ -6,7 +6,6 @@ using AutoMapper;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
-using Ambev.DeveloperEvaluation.Domain.Events;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
@@ -37,10 +36,7 @@ public class UpdateSaleHandlerTests
             BranchId = Guid.NewGuid(),
             BranchName = "Main Branch",
             IsCancelled = true,
-            Items = new List<UpdateSaleCommand.UpdateSaleItemDto>
-            {
-                new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }
-            }
+            Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }]
         };
         
         var existingSale = new Sale

@@ -6,14 +6,10 @@ using System.Reflection;
 
 namespace Ambev.DeveloperEvaluation.ORM;
 
-public class DefaultContext : DbContext
+public class DefaultContext(DbContextOptions<DefaultContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Sale> Sales { get; set; }
-
-    public DefaultContext(DbContextOptions<DefaultContext> options) : base(options)
-    {
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

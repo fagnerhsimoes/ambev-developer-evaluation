@@ -1,4 +1,3 @@
-using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Enums;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale;
@@ -18,7 +17,7 @@ public class GetSaleResult
     public decimal TotalAmount { get; set; }
     public bool IsCancelled { get; set; }
     public SaleStatus Status { get; set; }
-    public List<GetSaleItemDto> SaleItems { get; set; } = new();
+    public List<GetSaleItemDto> SaleItems { get; set; } = [];
 }
 
 public class GetSaleItemDto

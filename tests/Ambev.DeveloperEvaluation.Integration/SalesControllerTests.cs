@@ -1,29 +1,19 @@
-using System.Net;
 using System.Net.Http.Json;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Enums;
-using Ambev.DeveloperEvaluation.WebApi;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Integration;
 
-public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
+public class SalesControllerTests(AmbevWebApplicationFactory factory) : IClassFixture<AmbevWebApplicationFactory>
 {
-    private readonly HttpClient _client;
-    private readonly AmbevWebApplicationFactory _factory;
-
-    public SalesControllerTests(AmbevWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-    }
+    private readonly HttpClient _client = factory.CreateClient();
 
     [Fact(DisplayName = "CreateSale Endpoint should create sale and return 201")]
     public async Task CreateSale_ShouldReturnSuccess_WhenDataIsValid()
@@ -32,7 +22,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
         var userId = Guid.NewGuid();
 
         // Seed User
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
             context.Users.Add(new User 
@@ -56,10 +46,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
             CustomerName = "test_user_integration",
             BranchId = Guid.NewGuid(),
             BranchName = "Branch Integration",
-            Items = new List<CreateSaleCommand.CreateSaleItemDto>
-            {
-                new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }
-            }
+            Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }]
         };
 
         // Act: Call Create API
@@ -95,7 +82,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
         
         // Assert.Equal("test_user_integration", getResult.Data.CustomerName);
         // Check DB directly
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
             var savedSale = await context.Sales.FindAsync(createResult.Data.Id);
@@ -126,10 +113,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
             CustomerName = "user_update",
             BranchId = Guid.NewGuid(),
             BranchName = "Branch Updated",
-            Items = new List<UpdateSaleCommand.UpdateSaleItemDto>
-            {
-                new() { ProductId = Guid.NewGuid(), ProductName = "Beer Updated", Quantity = 10, UnitPrice = 15 } 
-            }
+            Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Beer Updated", Quantity = 10, UnitPrice = 15 }]
         };
 
         // 3. Act: Put
@@ -147,7 +131,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
         Assert.True(updateResult.Success);
         
         // 5. Verify Persistence (Direct DB)
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
             var updatedSale = await context.Sales.FindAsync(saleId);
@@ -177,7 +161,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
         response.EnsureSuccessStatusCode();
         
         // 4. Verify DB
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
             var sale = await context.Sales.FindAsync(saleId);
@@ -189,7 +173,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
 
     private async Task<Guid> SeedUserAsync(string username)
     {
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
         var userId = Guid.NewGuid();
         context.Users.Add(new User 
@@ -208,7 +192,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
 
     private async Task<Guid> SeedSaleAsync(Guid userId)
     {
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ORM.DefaultContext>();
         var sale = new Sale
         {
@@ -218,10 +202,7 @@ public class SalesControllerTests : IClassFixture<AmbevWebApplicationFactory>
             CustomerName = "test_user_integration",
             BranchId = Guid.NewGuid(),
             BranchName = "Branch Seed",
-            SaleItems = new List<SaleItem>
-            {
-                new() { ProductName = "Original Beer", Quantity = 1, UnitPrice = 10, TotalAmount = 10 }
-            },
+            SaleItems = [new() { ProductName = "Original Beer", Quantity = 1, UnitPrice = 10, TotalAmount = 10 }],
             TotalAmount = 10,
             Status = SaleStatus.Pending
         };

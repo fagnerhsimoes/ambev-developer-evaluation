@@ -60,33 +60,37 @@ public partial class Program
 
             var app = builder.Build();
             
-            using (var scope = app.Services.CreateScope())
+            // Only run migrations in non-Test environments
+            if (!app.Environment.IsEnvironment("Test"))
             {
-                try
+                using (var scope = app.Services.CreateScope())
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<DefaultContext>();
-        
-                    // Log para você saber o que está rolando
-                    Log.Information("🚀 Starting Database Migration...");
+                    try
+                    {
+                        var context = scope.ServiceProvider.GetRequiredService<DefaultContext>();
+            
+                        // Log para você saber o que está rolando
+                        Log.Information("🚀 Starting Database Migration...");
 
-                    if (context.Database.GetPendingMigrations().Any())
-                    {
-                        context.Database.Migrate();
-                        Log.Information("✅ Database Migration Completed Successfully!");
+                        if (context.Database.GetPendingMigrations().Any())
+                        {
+                            context.Database.Migrate();
+                            Log.Information("✅ Database Migration Completed Successfully!");
+                        }
+                        else
+                        {
+                            Log.Information("✅ Database is already up to date.");
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Log.Information("✅ Database is already up to date.");
+                        // Log Fatal para destacar no console do Docker
+                        Log.Fatal(ex, "❌ CRITICAL ERROR: Database migration failed.");
+            
+                        // IMPORTANTE: Derruba a aplicação para não subir quebrada.
+                        // O Docker vai tentar reiniciar automaticamente.
+                        throw; 
                     }
-                }
-                catch (Exception ex)
-                {
-                    // Log Fatal para destacar no console do Docker
-                    Log.Fatal(ex, "❌ CRITICAL ERROR: Database migration failed.");
-        
-                    // IMPORTANTE: Derruba a aplicação para não subir quebrada.
-                    // O Docker vai tentar reiniciar automaticamente.
-                    throw; 
                 }
             }
             

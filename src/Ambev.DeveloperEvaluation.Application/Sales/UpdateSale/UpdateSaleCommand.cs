@@ -1,5 +1,3 @@
-using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
-using Ambev.DeveloperEvaluation.Common.Validation;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
@@ -47,7 +45,7 @@ public class UpdateSaleCommand : IRequest<UpdateSaleResult>
     /// <summary>
     /// Gets or sets the items in the sale.
     /// </summary>
-    public List<UpdateSaleItemDto> Items { get; set; } = new();
+    public List<UpdateSaleItemDto> Items { get; set; } = [];
     
     /// <summary>
     /// Gets or sets a value indicating whether the sale is cancelled.
@@ -55,7 +53,7 @@ public class UpdateSaleCommand : IRequest<UpdateSaleResult>
     public bool IsCancelled { get; set; }
 
 
-public class UpdateSaleItemDto
+public record UpdateSaleItemDto
 {
     public Guid ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;

@@ -11,6 +11,7 @@ public class AmbevWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Test"); // Set environment for testing
         builder.UseSetting("ConnectionStrings:DefaultConnection", "Host=localhost;Database=TestDb;Username=g;Password=p");
 
         builder.ConfigureServices(services =>

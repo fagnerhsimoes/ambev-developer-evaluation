@@ -13,12 +13,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation;
 /// </summary>
 public class UserValidatorTests
 {
-    private readonly UserValidator _validator;
-
-    public UserValidatorTests()
-    {
-        _validator = new UserValidator();
-    }
+    private readonly UserValidator _validator = new();
 
     /// <summary>
     /// Tests that validation passes when all user properties are valid.

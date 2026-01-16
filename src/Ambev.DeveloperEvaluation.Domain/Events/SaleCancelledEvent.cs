@@ -2,12 +2,7 @@ using Ambev.DeveloperEvaluation.Domain.Entities;
 
 namespace Ambev.DeveloperEvaluation.Domain.Events;
 
-public class SaleCancelledEvent
+public class SaleCancelledEvent(Sale sale)
 {
-    public Sale Sale { get; }
-
-    public SaleCancelledEvent(Sale sale)
-    {
-        Sale = sale;
-    }
+    public Sale Sale { get; } = sale;
 }

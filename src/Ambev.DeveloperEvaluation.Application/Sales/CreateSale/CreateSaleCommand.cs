@@ -1,4 +1,3 @@
-using Ambev.DeveloperEvaluation.Common.Validation;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
@@ -41,7 +40,7 @@ public class CreateSaleCommand : IRequest<CreateSaleResult>
     /// <summary>
     /// Gets or sets the items in the sale.
     /// </summary>
-    public List<CreateSaleItemDto> Items { get; set; } = new();
+    public List<CreateSaleItemDto> Items { get; set; } = [];
 
 
 public class CreateSaleItemDto

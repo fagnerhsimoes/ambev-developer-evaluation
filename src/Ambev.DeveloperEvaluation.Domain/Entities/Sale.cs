@@ -66,7 +66,7 @@ public class Sale : BaseEntity
     /// <summary>
     /// Gets the collection of sale items.
     /// </summary>
-    public List<SaleItem> SaleItems { get; set; } = new();
+    public List<SaleItem> SaleItems { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the date and time when the sale was created.
@@ -152,6 +152,13 @@ public class Sale : BaseEntity
     {
         SaleItems.Add(item);
         CalculateTotalAmount();
+    }
+    
+    public Sale InitializeStatus()
+    {
+        // Initialize Status Or Completed, depending on flow. Using Pending for now.
+        Status = SaleStatus.Pending;
+        return this;
     }
 
     /// <summary>
