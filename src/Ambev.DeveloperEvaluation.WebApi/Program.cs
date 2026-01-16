@@ -60,39 +60,40 @@ public partial class Program
 
             var app = builder.Build();
             
+            // Retry policy for Database Migration
             // Only run migrations in non-Test environments
             if (!app.Environment.IsEnvironment("Test"))
             {
                 using var scope = app.Services.CreateScope();
+                var services = scope.ServiceProvider;
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                var context = services.GetRequiredService<DefaultContext>();
+
                 try
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<DefaultContext>();
-            
-                    // Log para você saber o que está rolando
-                    Log.Information("🚀 Starting Database Migration...");
+                    logger.LogInformation("Starting Database Migration...");
 
                     if ((await context.Database.GetPendingMigrationsAsync()).Any())
                     {
                         await context.Database.MigrateAsync();
-                        Log.Information("✅ Database Migration Completed Successfully!");
+                        logger.LogInformation("Database Migration Completed Successfully!");
                     }
                     else
                     {
-                        Log.Information("✅ Database is already up to date.");
+                        logger.LogInformation("Database is already up to date.");
                     }
 
                     // Run Seeding
-                    Log.Information("🌱 Starting Database Seeding...");
+                    logger.LogInformation("Starting Database Seeding...");
                     await Common.DbInitializer.InitializeAsync(app.Services);
-                    Log.Information("✅ Database Seeding Completed Successfully!");
+                    logger.LogInformation("Database Seeding Completed Successfully!");
                 }
                 catch (Exception ex)
                 {
-                    // Log Fatal para destacar no console do Docker
-                    Log.Fatal(ex, "❌ CRITICAL ERROR: Database migration failed.");
+                    logger.LogCritical(ex, "CRITICAL ERROR: Database migration failed.");
             
-                    // IMPORTANTE: Derruba a aplicação para não subir quebrada.
-                    // O Docker vai tentar reiniciar automaticamente.
+                    // IMPORTANT: Stop the application so it doesn't start in a broken state.
+                    // Docker will verify to restart automatically.
                     throw; 
                 }
             }

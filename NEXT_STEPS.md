@@ -1,63 +1,60 @@
-# Próximos Passos e Melhorias Sugeridas
+# Next Steps and Suggested Improvements
 
-Este documento delineia melhorias identificadas que agregariam valor ao projeto, demonstrando uma visão Sênior de
-arquitetura, qualidade e escalabilidade, respeitando as restrições e padrões originais do teste.
+This document outlines identified improvements that would add value to the project, demonstrating a Senior view of
+architecture, quality, and scalability, while respecting the original constraints and standards of the test.
 
-## 1. Segurança e Controle de Acesso
+## 1. Security (RBAC)
 
-- **Autenticação e Autorização**: Atualmente, os endpoints de `Sales` estão públicos.
-    - *Sugestão*: Adicionar o atributo `[Authorize]` no `SalesController` ou nos métodos individuais.
-    - *Valor*: Garante que apenas usuários autenticados possam criar ou visualizar vendas.
-- **Validação de Permissões (RBAC)**:
-    - *Sugestão*: Implementar verificação de Roles (ex: `[Authorize(Roles = "Manager,Admin")]`) para operações sensíveis
-      como Cancelamento de Venda.
+- **Role-Based Access Control (RBAC)**:
+    - *Suggestion*: Implement Role verification (e.g., `[Authorize(Roles = "Manager,Admin")]`) for sensitive operations
+      such as Sale Cancellation.
+    - *Value*: Increases security granularity beyond simple authentication.
 
-## 2. Qualidade e Testes Automatizados
+## 2. Quality and Automated Testing
 
-- **Testes de Integração (E2E)**:
-    - *Sugestão*: Criar testes usando `Microsoft.AspNetCore.Mvc.Testing` e `Testcontainers`.
-    - *Valor*: Valida o fluxo completo (API -> App -> Infra -> Banco) em um ambiente controlado, garantindo que a
-      injeção de dependência e o mapeamento do banco estão perfeitos.
-- **Testes de Carga**:
-    - *Sugestão*: Adicionar scripts básicos (ex: k6) para validar a performance da criação de vendas concorrentes.
+- **Integration Tests (E2E)**:
+    - *Suggestion*: Create tests using `Microsoft.AspNetCore.Mvc.Testing` and `Testcontainers`.
+    - *Value*: Validates the complete flow (API -> App -> Infra -> Database) in a controlled environment, ensuring that
+      dependency injection and database mapping are perfect.
+- **Load Tests**:
+    - *Suggestion*: Add basic scripts (e.g., k6) to validate the performance of concurrent sale creation.
 
-## 3. Observabilidade e Monitoramento
+## 3. Observability and Monitoring
 
-- **Logging Estruturado**:
-    - *Sugestão*: Enriquecer os logs no `CreateSaleHandler` e `UpdateSaleHandler` com propriedades estruturadas (ex:
-      `SaleId`, `CustomerId`) usando Serilog, facilitando buscas futuras.
-- **Métricas**:
-    - *Sugestão*: Expor métricas de negócio (ex: "Vendas Criadas por Hora", "Total de Descontos Concedidos") usando
+- **Structured Logging**:
+    - *Suggestion*: Enrich logs in `CreateSaleHandler` and `UpdateSaleHandler` with structured properties (e.g.,
+      `SaleId`, `CustomerId`) using Serilog, facilitating future searches.
+- **Metrics**:
+    - *Suggestion*: Expose business metrics (e.g., "Sales Created per Hour", "Total Discounts Given") using
       OpenTelemetry + Prometheus.
 
-## 4. Resiliência e Performance
+## 4. Resilience and Performance
 
-- **Idempotência**:
-    - *Sugestão*: Implementar um mecanismo de Idempotência no endpoint `POST /sales` usando uma chave única enviada pelo
-      cliente (Header `Idempotency-Key`).
-    - *Valor*: Evita duplicação de vendas em caso de falhas de rede.
-- **Cache**:
-    - *Sugestão*: Implementar Cache (Redis) no endpoint `GET /sales/{id}` para vendas finalizadas/antigas que raramente
-      mudam.
+- **Idempotency**:
+    - *Suggestion*: Implement an Idempotency mechanism on the `POST /sales` endpoint using a unique key sent by the
+      client (Header `Idempotency-Key`).
+    - *Value*: Prevents sale duplication in case of network failures.
+- **Caching**:
+    - *Suggestion*: Implement Caching (Redis) on the `GET /sales/{id}` endpoint for finalized/old sales that rarely
+      change.
 
-## 5. Documentação
+## 5. Documentation
 
 - **Swagger Examples**:
-    - *Sugestão*: Adicionar exemplos ricos de Request/Response no Swagger (usando `Swashbuckle.AspNetCore.Filters`).
-    - *Valor*: Facilita muito o consumo da API por outros desenvolvedores/front-ends.
+    - *Suggestion*: Add rich Request/Response examples in Swagger (using `Swashbuckle.AspNetCore.Filters`).
+    - *Value*: Greatly facilitates API consumption by other developers/front-ends.
 
-## 6. Arquitetura
+## 6. Architecture
 
 - **Notification Pattern**:
-    - *Sugestão*: Evoluir o retorno de erros de validação acumulando notificações de domínio ao invés de lançar exceções
-      para validações de regra de negócio (se o padrão do projeto permitir).
+    - *Suggestion*: Evolve error return to accumulate domain notifications instead of throwing exceptions for business
+      rule validations (if the project pattern permits).
 
 ## 7. CI/CD
 
 - **Github Actions**:
-    - *Sugestão*: Adicionar arquivo `.github/workflows/ci.yml` para buildar e rodar testes automaticamente a cada
-      Push/PR.
+    - *Suggestion*: Add a `.github/workflows/ci.yml` file to build and run tests automatically on every Push/PR.
 
 ---
-> **Nota**: Estas melhorias foram documentadas mas não implementadas para manter o escopo alinhado estritamente ao
-> solicitado no teste, demonstrando respeito aos requisitos iniciais (YAGNI - You Aren't Gonna Need It Yet).
+> **Note**: These improvements were documented but not implemented to keep the scope strictly aligned with the test
+> request, demonstrating respect for initial requirements (YAGNI - You Aren't Gonna Need It Yet).

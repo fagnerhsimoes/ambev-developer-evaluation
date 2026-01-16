@@ -15,9 +15,6 @@ public class GetSaleHandler(ISaleRepository saleRepository, IMapper mapper)
            throw new ValidationException("Sale ID is required");
 
         var sale = await saleRepository.GetByIdAsync(command.Id, cancellationToken);
-        if (sale == null)
-            throw new KeyNotFoundException($"Sale with ID {command.Id} not found");
-
-        return mapper.Map<GetSaleResult>(sale);
+        return sale == null ? throw new KeyNotFoundException($"Sale with ID {command.Id} not found") : mapper.Map<GetSaleResult>(sale);
     }
 }
