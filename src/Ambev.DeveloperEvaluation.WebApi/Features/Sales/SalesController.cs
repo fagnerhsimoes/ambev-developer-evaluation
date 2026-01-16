@@ -5,12 +5,12 @@ using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
-using Ambev.DeveloperEvaluation.WebApi.Features.Sales.DeleteSale;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSales;
 using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 
@@ -19,6 +19,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class SalesController : BaseController
 {
     private readonly IMediator _mediator;
@@ -46,12 +47,6 @@ public class SalesController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateSale([FromBody] CreateSaleRequest request, CancellationToken cancellationToken)
     {
-        var validator = new CreateSaleRequestValidator();
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
-
         var command = _mapper.Map<CreateSaleCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
 
@@ -75,14 +70,7 @@ public class SalesController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSale([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var request = new GetSaleRequest { Id = id };
-        var validator = new GetSaleRequestValidator();
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
-
-        var command = _mapper.Map<GetSaleCommand>(request.Id);
+        var command = new GetSaleCommand(id);
         var response = await _mediator.Send(command, cancellationToken);
 
         return Ok(new ApiResponseWithData<GetSaleResponse>
@@ -118,12 +106,7 @@ public class SalesController : BaseController
         };
 
         var response = await _mediator.Send(command, cancellationToken);
-
-        var paginatedList = new PaginatedList<GetSaleResponse>(
-            _mapper.Map<List<GetSaleResponse>>(response.Data),
-            response.TotalCount,
-            response.CurrentPage,
-            response.PageSize);
+        var paginatedList = _mapper.Map<PaginatedList<GetSaleResponse>>(response);
 
         return OkPaginated(paginatedList);
     }
@@ -141,16 +124,7 @@ public class SalesController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSale([FromRoute] Guid id, [FromBody] UpdateSaleRequest request, CancellationToken cancellationToken)
     {
-        // Ensure ID matches
-        if (id != request.Id)
-            return BadRequest(new { Message = "ID mismatch" });
-
-        var validator = new UpdateSaleRequestValidator();
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
-
+        request.Id = id; // Ensure ID from route is used
         var command = _mapper.Map<UpdateSaleCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
 
@@ -174,14 +148,7 @@ public class SalesController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteSale([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var request = new DeleteSaleRequest { Id = id };
-        var validator = new DeleteSaleRequestValidator();
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
-
-        var command = _mapper.Map<DeleteSaleCommand>(request.Id);
+        var command = new DeleteSaleCommand(id);
         await _mediator.Send(command, cancellationToken);
 
         return Ok(new ApiResponse

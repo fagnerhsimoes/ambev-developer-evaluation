@@ -6,6 +6,7 @@ using AutoMapper;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
@@ -19,7 +20,8 @@ public class UpdateSaleHandlerTests
     {
         _saleRepository = Substitute.For<ISaleRepository>();
         _mapper = Substitute.For<IMapper>();
-        _handler = new UpdateSaleHandler(_saleRepository, _mapper);
+        var logger = Substitute.For<ILogger<UpdateSaleHandler>>();
+        _handler = new UpdateSaleHandler(_saleRepository, _mapper, logger);
     }
 
     [Fact]
@@ -36,7 +38,7 @@ public class UpdateSaleHandlerTests
             BranchId = Guid.NewGuid(),
             BranchName = "Main Branch",
             IsCancelled = true,
-            Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }]
+            Items = [new UpdateSaleCommand.UpdateSaleItemDto { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }]
         };
         
         var existingSale = new Sale

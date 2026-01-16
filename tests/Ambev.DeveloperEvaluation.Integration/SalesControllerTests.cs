@@ -46,7 +46,7 @@ public class SalesControllerTests(AmbevWebApplicationFactory factory) : IClassFi
             CustomerName = "test_user_integration",
             BranchId = Guid.NewGuid(),
             BranchName = "Branch Integration",
-            Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }]
+            Items = [new CreateSaleCommand.CreateSaleItemDto { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 10 }]
         };
 
         // Act: Call Create API
@@ -113,7 +113,7 @@ public class SalesControllerTests(AmbevWebApplicationFactory factory) : IClassFi
             CustomerName = "user_update",
             BranchId = Guid.NewGuid(),
             BranchName = "Branch Updated",
-            Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Beer Updated", Quantity = 10, UnitPrice = 15 }]
+            Items = [new UpdateSaleCommand.UpdateSaleItemDto { ProductId = Guid.NewGuid(), ProductName = "Beer Updated", Quantity = 10, UnitPrice = 15 }]
         };
 
         // 3. Act: Put
@@ -202,7 +202,7 @@ public class SalesControllerTests(AmbevWebApplicationFactory factory) : IClassFi
             CustomerName = "test_user_integration",
             BranchId = Guid.NewGuid(),
             BranchName = "Branch Seed",
-            SaleItems = [new() { ProductName = "Original Beer", Quantity = 1, UnitPrice = 10, TotalAmount = 10 }],
+            SaleItems = [new SaleItem { ProductName = "Original Beer", Quantity = 1, UnitPrice = 10, TotalAmount = 10 }],
             TotalAmount = 10,
             Status = SaleStatus.Pending
         };

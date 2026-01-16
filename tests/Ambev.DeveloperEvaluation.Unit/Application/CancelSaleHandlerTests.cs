@@ -5,6 +5,7 @@ using Ambev.DeveloperEvaluation.Domain.Repositories;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
@@ -16,7 +17,8 @@ public class CancelSaleHandlerTests
     public CancelSaleHandlerTests()
     {
         _saleRepository = Substitute.For<ISaleRepository>();
-        _handler = new DeleteSaleHandler(_saleRepository);
+        var logger = Substitute.For<ILogger<DeleteSaleHandler>>();
+        _handler = new DeleteSaleHandler(_saleRepository, logger);
     }
 
     [Fact(DisplayName = "Cancel Sale should update status to Cancelled and IsCancelled to true")]

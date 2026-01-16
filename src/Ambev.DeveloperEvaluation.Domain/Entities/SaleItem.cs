@@ -59,43 +59,30 @@ public class SaleItem : BaseEntity
     public bool IsCancelled { get; set; }
 
     /// <summary>
-    /// Calculates the total amount and applies discount based on quantity.
+    /// Calculates the total amount and applies discount based on total quantity of identical items.
+    /// Business Rules:
+    /// - Total Quantity 1-3: 0% discount
+    /// - Total Quantity 4-9: 10% discount
+    /// - Total Quantity 10-20: 20% discount
     /// </summary>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when quantity exceeds 20 items or is less than 1.
-    /// </exception>
-    public void CalculateTotal()
+    /// <param name="totalGroupQuantity">The total quantity of identical items in the sale.</param>
+    public void CalculateTotal(int totalGroupQuantity)
     {
-        // Validate quantity limits
-        if (Quantity > 20)
-        {
-            throw new InvalidOperationException(
-                $"Cannot sell more than 20 identical items. Current quantity: {Quantity}"
-            );
-        }
-
-        if (Quantity < 1)
-        {
-            throw new InvalidOperationException(
-                $"Quantity must be at least 1. Current quantity: {Quantity}"
-            );
-        }
-
-        // Calculate discount based on business rules
-        if (Quantity < 4)
+        // Calculate discount based on total quantity of identical items
+        if (totalGroupQuantity < 4)
         {
             Discount = 0m;
         }
-        else if (Quantity >= 4 && Quantity < 10)
+        else if (totalGroupQuantity >= 4 && totalGroupQuantity < 10)
         {
             Discount = 10m;
         }
-        else // Quantity >= 10 && Quantity <= 20
+        else // totalGroupQuantity >= 10
         {
             Discount = 20m;
         }
 
-        // Calculate total with discount (Discount stored as percentage: 0, 10, 20)
+        // Calculate total with discount applied to this specific item's quantity
         TotalAmount = Math.Round(Quantity * UnitPrice * (1 - Discount / 100), 2);
     }
 

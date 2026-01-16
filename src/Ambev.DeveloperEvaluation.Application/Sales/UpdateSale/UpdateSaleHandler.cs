@@ -1,10 +1,11 @@
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 
-public class UpdateSaleHandler(ISaleRepository saleRepository, IMapper mapper) : IRequestHandler<UpdateSaleCommand, UpdateSaleResult>
+public class UpdateSaleHandler(ISaleRepository saleRepository, IMapper mapper, ILogger<UpdateSaleHandler> logger) : IRequestHandler<UpdateSaleCommand, UpdateSaleResult>
 {
     public async Task<UpdateSaleResult> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
     {
@@ -17,22 +18,21 @@ public class UpdateSaleHandler(ISaleRepository saleRepository, IMapper mapper) :
         mapper.Map(command, sale);
         
         // Recalculate totals
-        foreach (var item in sale.SaleItems)
-        {
-            item.CalculateTotal();
-        }
         sale.CalculateTotalAmount();
         
         // Handle cancellation
         if (command.IsCancelled)
         {
             sale.Cancel();
+            logger.LogInformation("Event Published: SaleCancelledEvent for Sale ID {SaleId}", sale.Id);
         }
 
         sale.UpdatedAt = DateTime.UtcNow;
 
         await saleRepository.UpdateAsync(sale, cancellationToken);
         
+        logger.LogInformation("Event Published: SaleModifiedEvent for Sale ID {SaleId}", sale.Id);
+
         var result = mapper.Map<UpdateSaleResult>(sale);
         return result;
     }

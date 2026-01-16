@@ -7,6 +7,7 @@ using FluentAssertions;
 using NSubstitute;
 using Xunit;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
@@ -22,7 +23,8 @@ public class CreateSaleHandlerTests
         _saleRepository = Substitute.For<ISaleRepository>();
         _userRepository = Substitute.For<IUserRepository>();
         _mapper = Substitute.For<IMapper>();
-        _handler = new CreateSaleHandler(_saleRepository, _userRepository, _mapper);
+        var logger = Substitute.For<ILogger<CreateSaleHandler>>();
+        _handler = new CreateSaleHandler(_saleRepository, _userRepository, _mapper, logger);
     }
 
     [Fact(DisplayName = "Given valid command When handled Then creates sale successfully")]
@@ -37,7 +39,7 @@ public class CreateSaleHandlerTests
             CustomerName = "Customer Name",
             BranchName = "Branch A",
             BranchId = Guid.NewGuid(),
-            Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Product A", Quantity = 5, UnitPrice = 100 }]
+            Items = [new CreateSaleCommand.CreateSaleItemDto { ProductId = Guid.NewGuid(), ProductName = "Product A", Quantity = 5, UnitPrice = 100 }]
         };
 
         var customer = new User { Id = command.CustomerId, Username = "Customer Name" };
@@ -75,7 +77,7 @@ public class CreateSaleHandlerTests
             CustomerName = "John Doe",
             BranchName = "Branch A",
             BranchId = Guid.NewGuid(),
-             Items = [new() { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 100 }]
+             Items = [new CreateSaleCommand.CreateSaleItemDto { ProductId = Guid.NewGuid(), ProductName = "Beer", Quantity = 5, UnitPrice = 100 }]
         };
 
         _userRepository.GetByIdAsync(command.CustomerId, Arg.Any<CancellationToken>()).Returns((User?)null);

@@ -2,6 +2,7 @@ using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.Domain.Common;
 using Ambev.DeveloperEvaluation.Domain.Enums;
 using Ambev.DeveloperEvaluation.Domain.Validation;
+using Ambev.DeveloperEvaluation.Domain.Exceptions;
 
 namespace Ambev.DeveloperEvaluation.Domain.Entities;
 
@@ -95,9 +96,30 @@ public class Sale : BaseEntity
 
     /// <summary>
     /// Calculates the total amount of the sale based on all items.
+    /// Enforces business rules for identical items limits and discounts.
     /// </summary>
     public void CalculateTotalAmount()
     {
+        var productQuantities = SaleItems
+            .Where(i => !i.IsCancelled)
+            .GroupBy(i => i.ProductId)
+            .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantity));
+
+        foreach (var item in SaleItems)
+        {
+            if (item.IsCancelled) continue;
+
+            if (productQuantities.TryGetValue(item.ProductId, out var totalQuantity))
+            {
+                if (totalQuantity > 20)
+                {
+                    throw new DomainException($"Cannot sell more than 20 items of product {item.ProductName}. Current total: {totalQuantity}");
+                }
+
+                item.CalculateTotal(totalQuantity);
+            }
+        }
+
         TotalAmount = SaleItems.Where(i => !i.IsCancelled).Sum(i => i.TotalAmount);
         UpdatedAt = DateTime.UtcNow;
     }

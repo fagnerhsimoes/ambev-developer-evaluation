@@ -1,10 +1,10 @@
 using MediatR;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.Domain.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 
-public class DeleteSaleHandler(ISaleRepository saleRepository) : IRequestHandler<DeleteSaleCommand, DeleteSaleResponse>
+public class DeleteSaleHandler(ISaleRepository saleRepository, ILogger<DeleteSaleHandler> logger) : IRequestHandler<DeleteSaleCommand, DeleteSaleResponse>
 {
     public async Task<DeleteSaleResponse> Handle(DeleteSaleCommand command, CancellationToken cancellationToken)
     {
@@ -15,6 +15,8 @@ public class DeleteSaleHandler(ISaleRepository saleRepository) : IRequestHandler
         // Cancel instead of physical delete
         sale.Cancel();
         await saleRepository.UpdateAsync(sale, cancellationToken);
+        
+        logger.LogInformation("Event Published: SaleCancelledEvent for Sale ID {SaleId}", sale.Id);
 
         return new DeleteSaleResponse { Success = true };
     }
