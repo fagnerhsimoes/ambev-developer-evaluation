@@ -1,5 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Common.Validation;
-using Ambev.DeveloperEvaluation.Domain.Enums;
+﻿using Ambev.DeveloperEvaluation.Domain.Enums;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Users.CreateUser;
@@ -14,9 +13,8 @@ namespace Ambev.DeveloperEvaluation.Application.Users.CreateUser;
 /// that returns a <see cref="CreateUserResult"/>.
 /// 
 /// The data provided in this command is validated using the 
-/// <see cref="CreateUserCommandValidator"/> which extends 
-/// <see cref="AbstractValidator{T}"/> to ensure that the fields are correctly 
-/// populated and follow the required rules.
+/// <see cref="CreateUserCommandValidator"/> which ensures that the fields are correctly 
+/// populated and follow the required rules via the MediatR pipeline.
 /// </remarks>
 public class CreateUserCommand : IRequest<CreateUserResult>
 {
@@ -51,14 +49,4 @@ public class CreateUserCommand : IRequest<CreateUserResult>
     public UserRole Role { get; set; }
 
 
-    public ValidationResultDetail Validate()
-    {
-        var validator = new CreateUserCommandValidator();
-        var result = validator.Validate(this);
-        return new ValidationResultDetail
-        {
-            IsValid = result.IsValid,
-            Errors = result.Errors.Select(o => (ValidationErrorDetail)o)
-        };
-    }
 }

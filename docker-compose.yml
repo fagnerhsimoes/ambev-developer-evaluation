@@ -1,50 +1,104 @@
-version: '3.8'
+networks:
+  ambev-network:
+    name: ambev-network
+    driver: bridge
+
+volumes:
+  ambev-postgres-data:
+    name: ambev-postgres-data
 
 services:
-  ambev.developerevaluation.webapi:
-    container_name: ambev_developer_evaluation_webapi
-    image: ${DOCKER_REGISTRY-}ambevdeveloperevaluationwebapi
+  # =============================================================================
+  # INFRASTRUCTURE SERVICES
+  # =============================================================================
+
+  ambev-postgres:
+    image: postgres:13
+    container_name: ambev-postgres
+    environment:
+      POSTGRES_USER: developer
+      POSTGRES_PASSWORD: ev@luAt10n
+      POSTGRES_DB: developer_evaluation
+      PGDATA: /data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - ambev-postgres-data:/data/pgdata
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U developer -d developer_evaluation" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - ambev-network
+
+  # =============================================================================
+  # INITIALIZATION SERVICES
+  # =============================================================================
+
+  ambev-migration-runner:
     build:
       context: .
       dockerfile: src/Ambev.DeveloperEvaluation.WebApi/Dockerfile
+      target: build
+    container_name: ambev-migration-runner
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_HTTPS_PORTS=8081
+      DB_SERVER: ambev-postgres
+      DB_NAME: developer_evaluation
+      DB_USER: developer
+      DB_PASSWORD: ev@luAt10n
+      ConnectionStrings__DefaultConnection: "Host=ambev-postgres;Port=5432;Database=developer_evaluation;Username=developer;Password=ev@luAt10n"
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      ambev-postgres:
+        condition: service_healthy
+        required: false
+    networks:
+      - ambev-network
+    working_dir: /source
+    entrypoint: >
+      /bin/sh -c "
+      set -e;
+      echo '--- [MIGRATION RUNNER] ---';
+      echo 'Instalando dotnet-ef...';
+      dotnet tool install --global dotnet-ef --version 8.0.0;
+      export PATH=\"$$PATH:/root/.dotnet/tools\";
+      echo 'Aguardando PostgreSQL...';
+      sleep 5;
+      echo 'Executando migrações EF Core...';
+      dotnet ef database update --project src/Ambev.DeveloperEvaluation.ORM --startup-project src/Ambev.DeveloperEvaluation.WebApi --connection \"Host=ambev-postgres;Port=5432;Database=developer_evaluation;Username=developer;Password=ev@luAt10n\";
+      echo '--- [SUCESSO] Migrações EF Core concluídas! ---'
+      "
+
+  # =============================================================================
+  # APPLICATION SERVICES
+  # =============================================================================
+
+  ambev-webapi:
+    build:
+      context: .
+      dockerfile: src/Ambev.DeveloperEvaluation.WebApi/Dockerfile
+    container_name: ambev-webapi
     ports:
-      - "8080"
-      - "8081"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-
-  ambev.developerevaluation.database:
-    container_name: ambev_developer_evaluation_database
-    image: postgres:13
-
+      - "8080:8080"
+      - "8081:8081"
     environment:
-      POSTGRES_DB: developer_evaluation
-      POSTGRES_USER: developer
-      POSTGRES_PASSWORD: ev@luAt10n
-    ports:
-      - "5432"
+      # Connection string
+      ConnectionStrings__DefaultConnection: "Host=ambev-postgres;Port=5432;Database=developer_evaluation;Username=developer;Password=ev@luAt10n"
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      ASPNETCORE_HTTPS_PORTS: 8081
+    depends_on:
+      ambev-migration-runner:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD-SHELL", "timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     restart: unless-stopped
-
-  ambev.developerevaluation.nosql:
-    container_name: ambev_developer_evaluation_nosql 
-    image: mongo:8.0    
-    environment:
-        MONGO_INITDB_ROOT_USERNAME: developer
-        MONGO_INITDB_ROOT_PASSWORD: ev@luAt10n
-    ports:
-      - "27017"
-
-  ambev.developerevaluation.cache:
-    container_name: ambev_developer_evaluation_cache 
-    image: redis:7.4.1-alpine     
-    command: redis-server --requirepass ev@luAt10n
-    environment:
-       MONGO_INITDB_ROOT_USERNAME: developer
-       MONGO_INITDB_ROOT_PASSWORD: ev@luAt10n
-    ports:
-       - "6379"
+    networks:
+      - ambev-network

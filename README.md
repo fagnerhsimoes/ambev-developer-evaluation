@@ -1,20 +1,118 @@
+# Ambev Developer Evaluation - Sales API
+
+> **Senior Developer / Tech Lead Submission**
+>
+> This repository contains a "Gold Standard" implementation of the Sales API, designed with Domain-Driven Design (DDD),
+> Clean Architecture, and enterprise-grade best practices.
+
+## 🚀 Quick Start
+
+### Using Docker (Recommended)
+
+**Prerequisites**: Docker & Docker Compose.
+
+1. **Run the application**:
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Access the API**: [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
+
+3. **View Logs (Domain Events)**:
+   To see the simulated **Domain Events** (e.g., `SaleCreated`, `SaleModified`) in action:
+   ```bash
+   docker compose logs -f ambev.developerevaluation.webapi
+   ```
+
+### Manual Setup
+
+Prerequisites: .NET 8 SDK, PostgreSQL.
+
+1. **Configure**: Update `appsettings.json` with your Database connection string.
+2. **Run**:
+   ```bash
+   dotnet run --project src/Ambev.DeveloperEvaluation.WebApi
+   ```
+
+---
+
+## 📚 Project Documentation
+
+This submission includes detailed documentation covering implementation, architecture, and future vision:
+
+| Document                                              | Description                                                                                       |
+|:------------------------------------------------------|:--------------------------------------------------------------------------------------------------|
+| **[Implementation Report](IMPLEMENTATION_REPORT.md)** | **Read First**. Details *what* was built, architectural decisions, and how requirements were met. |
+| **[API Documentation](.doc/sales-api.md)**            | Technical specification of the Sales API endpoints, requests, and responses.                      |
+| **[Next Steps & Vision](NEXT_STEPS.md)**              | A Senior-level roadmap for future improvements (Security, Observability, CI/CD).                  |
+| **[Initial Analysis](ANALYSIS_REPORT.md)**            | The initial code audit performed before development began.                                        |
+
+---
+
+## 🏗️ Architecture & Key Features
+
+* **Clean Architecture**: Strict separation of concerns (Domain, Application, WebApi, Infra).
+* **Domain-Driven Design (DDD)**: Rich Domain Models, Value Objects, and Domain Events (`SaleCreated`, `SaleModified`).
+* **CQRS**: Implementation using **MediatR** to separate Commands and Queries.
+* **Quality Assurance**:
+    * **93+ Unit Tests** covering complex domain logic.
+    * **FluentValidation** pipeline for defensive programming.
+* **Design Patterns**:
+    * **External Identity**: Decoupled references to Users and Branches.
+    * **Notification Pattern**: Domain Event publishing.
+
+---
+
+<details>
+<summary><strong>Original Evaluation Instructions</strong> (Click to expand)</summary>
+
 # Developer Evaluation Project
 
 `READ CAREFULLY`
 
 ## Instructions
+
 **The test below will have up to 7 calendar days to be delivered from the date of receipt of this manual.**
 
-- The code must be versioned in a public Github repository and a link must be sent for evaluation once completed
+- The code must be versioned in a public GitHub repository and a link must be sent for evaluation once completed
 - Upload this template to your repository and start working from it
 - Read the instructions carefully and make sure all requirements are being addressed
 - The repository must provide instructions on how to configure, execute and test the project
 - Documentation and overall organization will also be taken into consideration
 
+## Authentication & First Access
+
+The API is secure by default (`[Authorize]`). To facilitate testing, the application automatically seeds a default Admin
+user upon the first startup.
+
+**Default Admin Credentials:**
+
+- **Email:** `admin@ambev.com.br`
+- **Password:** `Admin123!`
+
+**How to authenticate:**
+
+1. Open Swagger UI (`/swagger`).
+2. Use the `/api/Auth/login` endpoint with the credentials above to get a JWT Token.
+3. Click the "Authorize" button in Swagger and paste the token as `Bearer <your_token>`.
+
+### Sales Module
+
+- **Create Sale**: Validates customer, calculates discounts (10% for 4+, 20% for 10-20 items), ensures limits (max 20
+  items).
+- **Update Sale**: Modifies items, recalculates totals, triggers `SaleModifiedEvent`.
+- **Get Sale**: Retrieves full sale details with formatted totals.
+- **List Sales**: Paginated retrieval (`_page`, `_size`, `_order`).
+- **Cancel Sale**: Soft delete logic, updates status to `Cancelled`.
+
+### Auth Module
+
 ## Use Case
+
 **You are a developer on the DeveloperStore team. Now we need to implement the API prototypes.**
 
-As we work with `DDD`, to reference entities from other domains, we use the `External Identities` pattern with denormalization of entity descriptions.
+As we work with `DDD`, to reference entities from other domains, we use the `External Identities` pattern with
+denormalization of entity descriptions.
 
 Therefore, you will write an API (complete CRUD) that handles sales records. The API needs to be able to inform:
 
@@ -31,12 +129,14 @@ Therefore, you will write an API (complete CRUD) that handles sales records. The
 * Cancelled/Not Cancelled
 
 It's not mandatory, but it would be a differential to build code for publishing events of:
+
 * SaleCreated
 * SaleModified
 * SaleCancelled
 * ItemCancelled
 
-If you write the code, **it's not required** to actually publish to any Message Broker. You can log a message in the application log or however you find most convenient.
+If you write the code, **it's not required** to actually publish to any Message Broker. You can log a message in the
+application log or however you find most convenient.
 
 ### Business Rules
 
@@ -48,27 +148,33 @@ If you write the code, **it's not required** to actually publish to any Message 
 These business rules define quantity-based discounting tiers and limitations:
 
 1. Discount Tiers:
-   - 4+ items: 10% discount
-   - 10-20 items: 20% discount
+    - 4+ items: 10% discount
+    - 10-20 items: 20% discount
 
 2. Restrictions:
-   - Maximum limit: 20 items per product
-   - No discounts allowed for quantities below 4 items
+    - Maximum limit: 20 items per product
+    - No discounts allowed for quantities below 4 items
 
 ## Overview
-This section provides a high-level overview of the project and the various skills and competencies it aims to assess for developer candidates. 
 
-See [Overview](/.doc/overview.md)
+This section provides a high-level overview of the project and the various skills and competencies it aims to assess for
+developer candidates.
+
+See **[Overview](.doc/overview.md)**
 
 ## Tech Stack
-This section lists the key technologies used in the project, including the backend, testing, frontend, and database components. 
 
-See [Tech Stack](/.doc/tech-stack.md)
+This section lists the key technologies used in the project, including the backend, testing, frontend, and database
+components.
+
+See **[Tech Stack](.doc/tech-stack.md)**
 
 ## Frameworks
-This section outlines the frameworks and libraries that are leveraged in the project to enhance development productivity and maintainability. 
 
-See [Frameworks](/.doc/frameworks.md)
+This section outlines the frameworks and libraries that are leveraged in the project to enhance development productivity
+and maintainability.
+
+See **[Frameworks](.doc/frameworks.md)**
 
 <!-- 
 ## API Structure
@@ -81,6 +187,57 @@ This section includes links to the detailed documentation for the different API 
 -->
 
 ## Project Structure
-This section describes the overall structure and organization of the project files and directories. 
 
-See [Project Structure](/.doc/project-structure.md)
+This section describes the overall structure and organization of the project files and directories.
+
+See **[Project Structure](.doc/project-structure.md)**
+
+## QA & Coverage
+
+> [!NOTE]
+> **Focus of unit tests was on the Sales Module (Domain logic and Command Handlers). Coverage for Sales Domain is >90%.
+> Legacy Auth modules were excluded from the scope.**
+
+The project enforces high code quality standards through comprehensive testing and static analysis.
+
+### Running Tests
+
+To execute the full test suite:
+
+```bash
+dotnet test tests/Ambev.DeveloperEvaluation.Unit/Ambev.DeveloperEvaluation.Unit.csproj
+```
+
+### Coverage Report
+
+To generate a coverage report (Linux/Bash):
+
+```bash
+./coverage-report.sh
+```
+
+The report will be available at `TestResults/CoverageReport/index.html`.
+
+### Key Metrics
+
+* **Total Tests**: 93 Passing
+* **Sales Module Coverage**:
+    * Handlers (Create/Update/Delete/Get): >80%
+    * Entities & Validation: >95%
+    * Legacy Modules: Excluded from coverage targets.
+
+## Docker Support
+
+This solution includes a `docker-compose.dcproj` to allow
+easy execution and debugging via Visual Studio / Rider.
+
+You can run the solution using:
+
+- IDE: Run → Docker Compose
+- CLI: docker compose up
+
+### Prerequisites
+
+- .NET SDK 8.x (LTS)
+
+</details>

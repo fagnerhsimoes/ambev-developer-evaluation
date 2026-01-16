@@ -22,7 +22,7 @@ public static class ActiveUserSpecificationTestData
     /// - Role (User)
     /// Status is not set here as it's the main test parameter
     /// </summary>
-    private static readonly Faker<User> userFaker = new Faker<User>()
+    private static readonly Faker<User> UserFaker = new Faker<User>()
         .CustomInstantiator(f => new User {
             Email = f.Internet.Email(),
             Password = $"Test@{f.Random.Number(100, 999)}",
@@ -39,7 +39,7 @@ public static class ActiveUserSpecificationTestData
     /// <returns>A valid User entity with randomly generated data and specified status.</returns>
     public static User GenerateUser(UserStatus status)
     {
-        var user = userFaker.Generate();
+        var user = UserFaker.Generate();
         user.Status = status;
         return user;
     }

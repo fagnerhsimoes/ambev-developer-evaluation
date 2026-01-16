@@ -12,9 +12,9 @@ using Serilog;
 
 namespace Ambev.DeveloperEvaluation.WebApi;
 
-public class Program
+public partial class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         try
         {
@@ -27,7 +27,13 @@ public class Program
             builder.Services.AddEndpointsApiExplorer();
 
             builder.AddBasicHealthChecks();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                // Include XML comments
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+            });
 
             builder.Services.AddDbContext<DefaultContext>(options =>
                 options.UseNpgsql(
@@ -53,6 +59,45 @@ public class Program
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             var app = builder.Build();
+            
+            // Retry policy for Database Migration
+            // Only run migrations in non-Test environments
+            if (!app.Environment.IsEnvironment("Test"))
+            {
+                using var scope = app.Services.CreateScope();
+                var services = scope.ServiceProvider;
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                var context = services.GetRequiredService<DefaultContext>();
+
+                try
+                {
+                    logger.LogInformation("Starting Database Migration...");
+
+                    if ((await context.Database.GetPendingMigrationsAsync()).Any())
+                    {
+                        await context.Database.MigrateAsync();
+                        logger.LogInformation("Database Migration Completed Successfully!");
+                    }
+                    else
+                    {
+                        logger.LogInformation("Database is already up to date.");
+                    }
+
+                    // Run Seeding
+                    logger.LogInformation("Starting Database Seeding...");
+                    await Common.DbInitializer.InitializeAsync(app.Services);
+                    logger.LogInformation("Database Seeding Completed Successfully!");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogCritical(ex, "CRITICAL ERROR: Database migration failed.");
+            
+                    // IMPORTANT: Stop the application so it doesn't start in a broken state.
+                    // Docker will verify to restart automatically.
+                    throw; 
+                }
+            }
+            
             app.UseMiddleware<ValidationExceptionMiddleware>();
 
             if (app.Environment.IsDevelopment())
@@ -70,7 +115,7 @@ public class Program
 
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
         catch (Exception ex)
         {
@@ -78,7 +123,8 @@ public class Program
         }
         finally
         {
-            Log.CloseAndFlush();
+            await Log.CloseAndFlushAsync();
         }
     }
 }
+public partial class Program;

@@ -18,6 +18,6 @@ public class BaseEntity : IComparable<BaseEntity>
             return 1;
         }
 
-        return other!.Id.CompareTo(Id);
+        return other.Id.CompareTo(Id);
     }
 }

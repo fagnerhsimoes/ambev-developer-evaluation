@@ -11,12 +11,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation;
 /// </summary>
 public class EmailValidatorTests
 {
-    private readonly EmailValidator _validator;
-
-    public EmailValidatorTests()
-    {
-        _validator = new EmailValidator();
-    }
+    private readonly EmailValidator _validator = new();
 
     /// <summary>
     /// Tests that validation passes for various valid email formats.
